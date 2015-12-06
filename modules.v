@@ -73,6 +73,10 @@ module RegistersMod(opcode, RS, RT, RD, Read, Write,
    always @(posedge Write) begin
       registers[RD] = bWriteData ? data : ALUout;
    end
+
+   initial begin registers[1] = 1; registers[2] = 2; end
+
+   // Setting $1 = 1 and $2 = 2 is from MIPS-inst.txt
 endmodule
 
 module DataCacheMod(Read, Write, addr, input_data, output_buffer);

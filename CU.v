@@ -31,7 +31,7 @@ module SignalDefinerMod(S, T, BEQout,
    output incPC, InstRead, ldIR, ldPC, MemRead, MemWrite, RegRead, RegWrite;
 
    wire   regWriteInst;
-   or(regWriteInst,T[0],T[1],T[2],T[3],T[4]);
+   or(regWriteInst,T[1],T[2],T[3],T[4],T[5]);
    
    assign InstRead = S[0];    // IF  S0: InstRead    PC has addr 0 initially, read inst
    assign ldIR = S[1];        //     S1: ldIR
