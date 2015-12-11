@@ -18,11 +18,8 @@ module ALUmod(opcode, operand1, operand2, imm_value, ALUout); // free-form ALU h
 		   (opcode == 2) ? operand1 - operand2 :
                    (opcode == 3) ? operand1 | operand2 :  
 		   (opcode == 4) ? operand1 & operand2 :
-		   (opcode == 7) ? operand1 + imm_value : 0;  
-
-   // TODO: (1) fix this so that imm_value is treated as signed.
-   //       (2) Can we / should we set ALUout to 'z' or some other value
-   //           in the error case? (Rather than 0, as I have it now.)
+		   (opcode == 5) ? operand1 + imm_value : 
+		   (opcode == 6) ? operand1 + imm_value: 32'bx;  
 endmodule
 
 // specially-made for branch type of inst, e.g., "beq $0, $1, 20"
@@ -32,7 +29,7 @@ module BEQmod(RSout, RTout, BEQout, PCout, imm_value, branch_addr);
    output BEQout;
    output [31:0] branch_addr;
 
-   assign BEQout = RSout == RTout; // If RS == RT, branch
+   assign BEQout = RSout == RTout ? 1 : 0; // If RS == RT, branch
    
    assign branch_addr = PCout + imm_value; 
    // Usually we would use the ALU to compute the branch target,
@@ -53,6 +50,16 @@ module RegistersMod(opcode, RS, RT, RD, Read, Write,
    
    reg [31:0] 	 registers [31:0];
 
+   wire [4:0] 	 rt_rd;
+   assign rt_rd = opcode <=4 ? RD:
+		  opcode == 5 ? RT:
+		  5'bx;
+   
+   wire [31:0] 	 wbdata;
+   assign wbdata = opcode <= 4 ? ALUout:
+		   opcode == 5 ? data:
+		   32'bx;
+
    assign R0 = registers[0];
    assign R1 = registers[1];
    assign R2 = registers[2];
@@ -62,16 +69,9 @@ module RegistersMod(opcode, RS, RT, RD, Read, Write,
       RSout = registers[RS];
       RTout = registers[RT];
    end
-   
-   wire invMiddleOp;
-   not(invMiddleOp, opcode[1]);
-   wire bWriteData; // write the "data" input only when using the lw instruction
-   and(bWriteData, opcode[2], invMiddleOp, opcode[0]); 
-   // The preceding mess could be avoided if we passed in the "T" field
-   // but his implementation doesn't do it that way so neither will I.
-   
+     
    always @(posedge Write) begin
-      registers[RD] = bWriteData ? data : ALUout;
+      registers[rt_rd] = wbdata;
    end
 
    initial begin registers[1] = 1; registers[2] = 2; end
@@ -85,13 +85,26 @@ module DataCacheMod(Read, Write, addr, input_data, output_buffer);
    output [31:0] output_buffer;
    reg [31:0] 	 output_buffer;
    
-   reg [31:0] cache [15:0];
+   reg [31:0] cache [0:15];
+   wire [3:0] actual_addr;
 
-   initial cache[3] = -1;  // only this word initialized
+   assign actual_addr = addr[3:0];
 
-   always @(posedge Read) output_buffer = cache[addr];
+   initial begin
+      cache[3] = -1;  // only this word initialized
+      $monitor("cache[3] = %x", cache[3]);
+   end 
 
-   always @(posedge Write) cache[addr] = input_data;
+   always @(posedge Read) begin 
+//      $display("addr / ALUout = %x", addr);
+//      $display("Reading actual_addr %x which has value %x", actual_addr, cache[actual_addr]); 
+      output_buffer = cache[actual_addr];
+   end
+   always @(posedge Write) begin
+//      $display("addr / ALUout = %x", addr);
+//      $display("Writing addr %x with new value %x", actual_addr, input_data);
+      cache[actual_addr] = input_data;
+   end
 endmodule
 
 module InstCacheMod(Read, addr, output_buffer);
