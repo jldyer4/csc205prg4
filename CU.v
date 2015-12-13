@@ -1,5 +1,5 @@
 // CU.v
-// Control Unit with its Sequencer, Decoder, Signal Definer
+// Jesse Dyer and Kurt Miller
 
 // given clk, IR, BEQout, CUmod outputs control signals
 module CUmod(clk, opcode, RS, RT, RD, BEQout,
@@ -35,7 +35,7 @@ module SignalDefinerMod(S, T, BEQout,
    
    assign InstRead = S[0];    // IF  S0: InstRead    PC has addr 0 initially, read inst
    assign ldIR = S[1];        //     S1: ldIR
-   assign RegRead = S[2];     // ID  S2: ReadRead    Registers read for getting operands
+   assign RegRead = S[2];     // ID  S2: RegRead     Registers read for getting operands
                               // EX  S3: (nothing)   ALU operates on operands
    and(MemRead,T[5],S[4]);    // MEM S4: MemRead     if "lw" inst
    and(MemWrite,T[6],S[4]);   //     S4: MemWrite    if "sw" inst

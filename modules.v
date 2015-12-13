@@ -1,12 +1,5 @@
 // modules.v
-//
-// ALUmod (free-handed)
-// RegistersMod
-// DataCacheMod
-// InstCacheMod
-// PCmod (free-handed)
-// IRmod
-// BEQmod (for "beq" inst, compare two registers, calc branch addr)
+// Jesse Dyer and Kurt Miller
 
 module ALUmod(opcode, operand1, operand2, imm_value, ALUout); // free-form ALU here
    input [5:0] opcode;
@@ -19,7 +12,7 @@ module ALUmod(opcode, operand1, operand2, imm_value, ALUout); // free-form ALU h
                    (opcode == 3) ? operand1 | operand2 :  
 		   (opcode == 4) ? operand1 & operand2 :
 		   (opcode == 5) ? operand1 + imm_value : 
-		   (opcode == 6) ? operand1 + imm_value: 32'bx;  
+		   (opcode == 6) ? operand1 + imm_value : 32'bx;  
 endmodule
 
 // specially-made for branch type of inst, e.g., "beq $0, $1, 20"

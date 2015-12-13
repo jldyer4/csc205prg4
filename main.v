@@ -1,6 +1,5 @@
 // main.v
-// demo programs of a simple CPU that has a control unit to
-// fetch instructions one by one.
+// Jesse Dyer and Kurt Miller
 
 `include "CU.v"            // control unit
 `include "modules.v"       // PC, IR, InstCache
